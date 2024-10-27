@@ -8,106 +8,95 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Paleta de colores en tonos de azul */
+        /* Paleta de colores en tonos de morado */
         body {
             font-family: 'Orbitron', sans-serif;
-            background-color: #0f172a; /* Azul oscuro */
-            color: #f1f5f9; /* Texto gris claro */
+            background-color: #1e1b32; /* Morado oscuro */
+            color: #f3e8ff; /* Texto en color lila */
         }
 
-        /* Título sin animación */
+        /* Estilos del título */
         h1 {
-            color: #38bdf8;
+            color: #9f7aea;
             text-transform: uppercase;
-            font-size: 28px;
+            font-size: 30px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        /* Fondo de la sección de carga de archivos */
+        /* Fondo de la sección de carga */
         .file-upload {
-            background-color: #1e293b; /* Azul oscuro */
-            border: 2px dashed #38bdf8; /* Borde cian */
+            background-color: #2d2a47; /* Morado oscuro */
+            border: 2px dashed #9f7aea;
         }
 
-        /* Imágenes en estilo contenedor */
-        .uploaded-image {
-            width: 90px;
-            height: 90px;
-            border-radius: 8px;
-            background-color: #334155; /* Azul más claro */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        /* Botón de análisis */
+        /* Estilos del botón */
         .btn-analyze {
-            background-color: #38bdf8; /* Cian */
-            color: #1e293b; /* Texto en azul oscuro */
+            background-color: #9f7aea;
+            color: #1e1b32;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .btn-analyze:hover {
-            background-color: #67e8f9; /* Cian más claro */
+            background-color: #b794f4;
             transform: scale(1.05);
         }
 
-        /* Estilo para la sección de resultados */
+        /* Resultados de análisis */
         #resultImage {
-            max-width: 60%;
+            max-width: 80%;
             height: auto;
             border-radius: 10px;
-            transition: box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 0 15px #9f7aea, 0 0 30px #9f7aea;
+            transition: transform 0.2s ease;
         }
 
         #resultImage:hover {
-            box-shadow: 0 0 15px #38bdf8, 0 0 30px #38bdf8; /* Brillo cian */
             transform: scale(1.05);
         }
 
         /* Indicador de carga */
         #loading .spinner {
-            border-top-color: #38bdf8; /* Color cian */
-            border-right-color: #1e293b; /* Color de fondo */
+            border-top-color: #9f7aea;
+            border-right-color: #2d2a47;
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-center mb-8">Face Recognition Portal</h1>
-    
-        <div class="max-w-xl mx-auto space-y-8">
-    
-            <!-- Sección de Carga de Archivos -->
-            <div class="file-upload p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-semibold mb-4 text-center">Upload an Image</h2>
-                <form id="uploadForm" class="space-y-4" onsubmit="return handleFormSubmit(event)">
-                    <label class="flex flex-col items-center border-dashed border-cyan-500 rounded-lg cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 mb-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                        </svg>
-                        <p class="text-sm text-cyan-400">Select an Image</p>
-                        <input type="file" class="opacity-0" name="file" accept=".jpg,.jpeg,.png" onchange="previewImage(event)" />
-                    </label>
-                    <button type="submit" class="btn-analyze w-full px-4 py-2 rounded-lg focus:outline-none">Analyze Image</button>
-                </form>
-            </div>
+    <div class="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Columna de carga de archivos -->
+        <div class="file-upload p-6 rounded-lg shadow-md md:col-span-1">
+            <h2 class="text-lg font-semibold mb-4 text-center">Upload an Image</h2>
+            <form id="uploadForm" class="space-y-4" onsubmit="return handleFormSubmit(event)">
+                <label class="flex flex-col items-center cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 mb-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                    </svg>
+                    <p class="text-sm text-purple-300">Select an Image</p>
+                    <input type="file" class="opacity-0" name="file" accept=".jpg,.jpeg,.png" onchange="previewImage(event)" />
+                </label>
+                <button type="submit" class="btn-analyze w-full px-4 py-2 rounded-lg">Analyze Image</button>
+            </form>
+        </div>
 
-            <!-- Sección de Resultados -->
-            <div id="results" class="results-section hidden mt-8 text-center">
-                <h2 class="text-xl font-semibold mb-4">Analysis Results</h2>
-                <div class="border border-cyan-500 rounded-lg p-4 bg-gray-800 relative flex flex-col items-center">
-                    <img id="resultImage" src="" alt="Analysis Result" style="display: none;">
-                    
-                    <div id="loading" class="hidden absolute flex items-center justify-center top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <div class="spinner animate-spin rounded-full h-16 w-16 border-b-2"></div>
-                    </div>
-                    
-                    <div id="error" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-red-900 border border-red-700 text-red-200 rounded-lg text-lg z-10">
-                        <!-- Error message -->
-                    </div>
+        <!-- Columna de resultados de análisis -->
+        <div id="results" class="results-section hidden md:col-span-2 text-center space-y-4">
+            <h2 class="text-xl font-semibold mb-4">Analysis Results</h2>
+            <div class="border border-purple-500 rounded-lg p-4 bg-gray-800 relative flex flex-col items-center">
+                <img id="resultImage" src="" alt="Analysis Result" style="display: none;">
+                <div id="loading" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div class="spinner animate-spin rounded-full h-16 w-16 border-b-2"></div>
+                </div>
+                <div id="error" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-red-900 border border-red-700 text-red-200 rounded-lg text-lg z-10">
+                    <!-- Error message -->
                 </div>
             </div>
-       
+        </div>
+    </div>
+
     <script>
-        // AJAX for image analysis
+        // AJAX para el análisis de imagen
         $('#uploadForm').submit(function (e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -137,7 +126,7 @@
             const imageFile = event.target.files[0];
             const reader = new FileReader();
             reader.onload = function (e) {
-                $('#resultImage').attr('src', e.target.result).css('display', 'block'); // Show preview image
+                $('#resultImage').attr('src', e.target.result).css('display', 'block'); // Mostrar imagen previa
             };
             reader.readAsDataURL(imageFile);
         }
@@ -152,3 +141,4 @@
     </script>
 </body>
 </html>
+
