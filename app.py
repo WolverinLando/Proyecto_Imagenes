@@ -12,7 +12,7 @@ from pyngrok import ngrok
 import base64
 
 # Crear la aplicación Flask
-app = Flask(_name_)
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
 
 
@@ -100,7 +100,7 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Ejecuta la aplicación Flask
-if _name_ == '_main_':
+if __name__ == '__main__':
     # Iniciar un túnel ngrok en el puerto 5000
     public_url = ngrok.connect(5000)
     print(f" * ngrok URL: {public_url}")
