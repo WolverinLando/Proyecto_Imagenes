@@ -8,14 +8,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Paleta de colores en tonos de morado */
         body {
             font-family: 'Orbitron', sans-serif;
-            background-color: #1e1b32; /* Morado oscuro */
-            color: #f3e8ff; /* Texto en color lila */
+            background-color: #1e1b32;
+            color: #f3e8ff;
         }
-
-        /* Estilos del título */
         h1 {
             color: #9f7aea;
             text-transform: uppercase;
@@ -23,42 +20,28 @@
             text-align: center;
             margin-bottom: 20px;
         }
-
-        /* Fondo de la sección de carga */
         .file-upload {
-            background-color: #2d2a47; /* Morado oscuro */
+            background-color: #2d2a47;
             border: 2px dashed #9f7aea;
         }
-
-        /* Estilos del botón */
-        .btn-analyze {
+        .btn {
             background-color: #9f7aea;
             color: #1e1b32;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
-        .btn-analyze:hover {
+        .btn:hover {
             background-color: #b794f4;
             transform: scale(1.05);
         }
-
-        /* Resultados de análisis */
-        #resultImage {
+        #resultImage, #transformedImage {
             max-width: 80%;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 0 15px #9f7aea, 0 0 30px #9f7aea;
             transition: transform 0.2s ease;
         }
-
-        #resultImage:hover {
+        #resultImage:hover, #transformedImage:hover {
             transform: scale(1.05);
-        }
-
-        /* Indicador de carga */
-        #loading .spinner {
-            border-top-color: #9f7aea;
-            border-right-color: #2d2a47;
         }
     </style>
 </head>
@@ -68,39 +51,39 @@
         <!-- Columna de carga de archivos -->
         <div class="file-upload p-6 rounded-lg shadow-md md:col-span-1">
             <h2 class="text-lg font-semibold mb-4 text-center">Upload an Image</h2>
-            <form id="uploadForm" class="space-y-4" onsubmit="return handleFormSubmit(event)">
+            <form id="uploadForm" class="space-y-4">
                 <label class="flex flex-col items-center cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-400 mb-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
                     </svg>
                     <p class="text-sm text-purple-300">Select an Image</p>
-                    <input type="file" class="opacity-0" name="file" accept=".jpg,.jpeg,.png" onchange="previewImage(event)" />
+                    <input type="file" class="opacity-0" name="file" accept=".jpg,.jpeg,.png" />
                 </label>
-                <button type="submit" class="btn-analyze w-full px-4 py-2 rounded-lg">Analyze Image</button>
+                <button type="submit" class="btn w-full px-4 py-2 rounded-lg">Analyze Image</button>
             </form>
+            <button id="transformButton" class="btn w-full px-4 py-2 mt-4 rounded-lg hidden">Transform Image</button>
         </div>
 
-        <!-- Columna de resultados de análisis -->
-        <div id="results" class="results-section hidden md:col-span-2 text-center space-y-4">
-            <h2 class="text-xl font-semibold mb-4">Analysis Results</h2>
-            <div class="border border-purple-500 rounded-lg p-4 bg-gray-800 relative flex flex-col items-center">
-                <img id="resultImage" src="" alt="Analysis Result" style="display: none;">
-                <div id="loading" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="spinner animate-spin rounded-full h-16 w-16 border-b-2"></div>
-                </div>
-                <div id="error" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-red-900 border border-red-700 text-red-200 rounded-lg text-lg z-10">
-                    <!-- Error message -->
-                </div>
+        <!-- Columna de resultados -->
+        <div id="results" class="hidden md:col-span-2 space-y-6 text-center">
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Original Analysis</h2>
+                <img id="resultImage" src="" alt="Analysis Result">
+            </div>
+            <div id="transformationResults" class="hidden">
+                <h2 class="text-xl font-semibold mb-4">Transformed Image</h2>
+                <img id="transformedImage" src="" alt="Transformed Result">
             </div>
         </div>
     </div>
 
     <script>
-        // AJAX para el análisis de imagen
+        // Cargar y analizar la imagen
         $('#uploadForm').submit(function (e) {
             e.preventDefault();
             const formData = new FormData(this);
-            showLoading();
+            $('#results').addClass('hidden');
+            $('#transformationResults').addClass('hidden');
 
             $.ajax({
                 url: '/analyze',
@@ -109,36 +92,34 @@
                 contentType: false,
                 processData: false,
                 success: function (response) {
-                    hideLoading();
                     $('#results').removeClass('hidden');
                     $('#resultImage').attr('src', 'data:image/png;base64,' + response.image);
+                    $('#transformButton').removeClass('hidden');
                 },
-                error: function (xhr) {
-                    hideLoading();
-                    $('#error')
-                        .removeClass('hidden')
-                        .text(xhr.responseJSON?.error || 'An error occurred');
+                error: function () {
+                    Swal.fire('Error', 'An error occurred while analyzing the image.', 'error');
                 }
             });
         });
 
-        function previewImage(event) {
-            const imageFile = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                $('#resultImage').attr('src', e.target.result).css('display', 'block'); // Mostrar imagen previa
-            };
-            reader.readAsDataURL(imageFile);
-        }
-
-        function showLoading() {
-            $('#loading').removeClass('hidden');
-        }
-
-        function hideLoading() {
-            $('#loading').addClass('hidden');
-        }
+        // Transformar la imagen
+        $('#transformButton').click(function () {
+            const formData = new FormData($('#uploadForm')[0]);
+            $.ajax({
+                url: '/transform',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    $('#transformationResults').removeClass('hidden');
+                    $('#transformedImage').attr('src', 'data:image/png;base64,' + response.image);
+                },
+                error: function () {
+                    Swal.fire('Error', 'An error occurred while transforming the image.', 'error');
+                }
+            });
+        });
     </script>
 </body>
 </html>
-
